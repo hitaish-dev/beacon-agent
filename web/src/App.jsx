@@ -298,8 +298,10 @@ export default function App() {
                     <span className="report-stats">
                       {result.wordCount ? `${result.wordCount.toLocaleString()} words · ~${Math.max(1, Math.round(result.wordCount / 450))} pages` : ''}
                     </span>
-                    {result.pdfReady && (
-                      <a className="pdf-btn" href={`/api/pdf/${result.id}`} target="_blank" rel="noreferrer">
+                    {(result.pdfUrl || result.pdfReady) && (
+                      // Prefer the hosted Supabase URL (survives server restarts on
+                      // free hosting); fall back to the local disk route otherwise.
+                      <a className="pdf-btn" href={result.pdfUrl || `/api/pdf/${result.id}`} target="_blank" rel="noreferrer">
                         📄 Download PDF
                       </a>
                     )}
@@ -398,6 +400,9 @@ function hydrateFromHistory(h, setResult, setTab) {
     socialPosts: h.social_posts || h.socialPosts,
     sources: h.sources,
     whatsapp: h.whatsapp,
+    // Hosted PDF URL is persisted nested under whatsapp; surface it so the
+    // Download PDF button works for past runs (local disk files are long gone).
+    pdfUrl: h.whatsapp?.pdfUrl || null,
     modes: h.providers,
   });
   setTab('report');
