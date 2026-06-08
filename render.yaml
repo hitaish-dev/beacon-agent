@@ -1,0 +1,42 @@
+# Render Blueprint for Beacon by Luminark.
+# One long-running Node web service: it builds the Vite frontend and the Express
+# server serves both the API (SSE agent runs) and the static dist/ bundle.
+#
+# Deploy: push this repo to GitHub, then in Render → New → Blueprint, point it at
+# the repo. Render reads this file and prompts for the secret env vars below.
+services:
+  - type: web
+    name: beacon-agent
+    runtime: node
+    plan: free
+    # --include=dev forces Vite/React (devDependencies) to install even when
+    # Render sets NODE_ENV=production, since the build needs them.
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/status
+    envVars:
+      - key: NODE_VERSION
+        value: 22.11.0
+      # ── Secrets — Render prompts for these on first deploy (never stored in git) ──
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        sync: false
+      - key: TWILIO_WHATSAPP_TO
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
