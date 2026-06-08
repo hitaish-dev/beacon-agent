@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🔦 Beacon by Luminark
+# 🔦 Beacon
 
 ### Give it one topic. It researches the web, writes a sourced report, drafts social posts, generates a PDF, and WhatsApps it to you — autonomously, streaming every step live.
 

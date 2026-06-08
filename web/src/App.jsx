@@ -39,7 +39,7 @@ function Pill({ label, value, mock }) {
 
 export default function App() {
   const [topic, setTopic] = useState('');
-  const [brand, setBrand] = useState('District 6');
+  const [brand, setBrand] = useState('');
   const [depthLevel, setDepthLevel] = useState(1);
   const [sendWa, setSendWa] = useState(true);
   const [status, setStatus] = useState(null);
@@ -151,7 +151,7 @@ export default function App() {
         <div className="brand">
           <div className="beacon-mark">🔦</div>
           <div>
-            <h1>Beacon <span className="amber sub-brand">by Luminark</span></h1>
+            <h1>Beacon</h1>
             <p>Agentic research → report → social → WhatsApp</p>
           </div>
         </div>
@@ -171,7 +171,7 @@ export default function App() {
               placeholder="e.g. AI answer-engine visibility for breweries"
             />
             <label>Brand context</label>
-            <input value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="District 6" />
+            <input value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="Your brand name" />
 
             <div className="depth-head">
               <label style={{ margin: 0 }}>Report depth</label>
@@ -228,21 +228,45 @@ export default function App() {
 
           {(running || result) && (
             <div className="card" style={{ marginTop: 18 }}>
-              <h2>Agent timeline</h2>
-              <div className="timeline">
-                {STEPS.map((s) => {
-                  const st = stepState[s.key];
-                  return (
-                    <div key={s.key} className={`tl-step ${st || ''}`}>
-                      <div className="tl-icon">{st === 'done' ? '✓' : s.icon}</div>
+              <h2>Agent status</h2>
+              {(() => {
+                const doneCount = STEPS.filter((s) => stepState[s.key] === 'done').length;
+                const active = STEPS.find((s) => stepState[s.key] === 'active');
+                const pct = Math.round((doneCount / STEPS.length) * 100);
+
+                let cls, icon, label, detail;
+                if (active) {
+                  cls = 'active';
+                  icon = active.icon;
+                  label = active.label;
+                  detail = stepDetail[active.key] || `Step ${doneCount + 1} of ${STEPS.length}`;
+                } else if (running) {
+                  cls = 'active';
+                  icon = '⏳';
+                  label = 'Working…';
+                  detail = `${doneCount} of ${STEPS.length} steps complete`;
+                } else {
+                  cls = 'done';
+                  icon = '✓';
+                  label = 'All steps complete';
+                  detail = 'Your report is ready →';
+                }
+
+                return (
+                  <>
+                    <div className={`tl-step ${cls}`}>
+                      <div className="tl-icon">{icon}</div>
                       <div className="tl-body">
-                        <div className="tl-label">{s.label}</div>
-                        {stepDetail[s.key] && <div className="tl-detail">{stepDetail[s.key]}</div>}
+                        <div className="tl-label">{label}</div>
+                        <div className="tl-detail">{detail}</div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                    <div className="step-progress">
+                      <span style={{ width: `${running ? pct : 100}%` }} />
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           )}
 
@@ -370,7 +394,7 @@ export default function App() {
       </div>
 
       <div className="footer">
-        <b>Beacon by Luminark</b> · React + LangChain agent · Gemini→OpenAI→Claude fallback · Twilio WhatsApp · Supabase
+        <b>Beacon</b> · React + LangChain agent · Gemini→OpenAI→Claude fallback · Twilio WhatsApp · Supabase
       </div>
     </div>
   );

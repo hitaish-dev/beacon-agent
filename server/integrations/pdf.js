@@ -68,7 +68,7 @@ export async function generatePdf({ id, topic, brand, report, sources = [], meta
     const doc = new PDFDocument({
       size: 'A4',
       margins: { top: 64, bottom: 64, left: 64, right: 64 },
-      info: { Title: `${topic} — Beacon report`, Author: 'Beacon by Luminark' },
+      info: { Title: `${topic} — Beacon report`, Author: 'Beacon' },
     });
     const stream = createWriteStream(file);
     doc.pipe(stream);
@@ -77,7 +77,7 @@ export async function generatePdf({ id, topic, brand, report, sources = [], meta
     doc.rect(0, 0, doc.page.width, 220).fill(TEAL_DK);
     doc.rect(0, 220, doc.page.width, 6).fill(AMBER);
     doc.fillColor(AMBER).fontSize(13).font('Helvetica-Bold').text('BEACON', 64, 70, { characterSpacing: 3 });
-    doc.fillColor('#9fc4bf').fontSize(11).font('Helvetica').text('by Luminark - AI research briefing', 64, 90);
+    doc.fillColor('#9fc4bf').fontSize(11).font('Helvetica').text('AI research briefing', 64, 90);
     doc.fillColor('#eafaf7').fontSize(28).font('Helvetica-Bold').text(sanitize(topic), 64, 124, { width: doc.page.width - 128 });
     doc.fillColor('#9fc4bf').fontSize(12).font('Helvetica').text(`Prepared for ${sanitize(brand)}`, 64, 188);
 

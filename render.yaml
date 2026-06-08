@@ -1,4 +1,4 @@
-# Render Blueprint for Beacon by Luminark.
+# Render Blueprint for Beacon.
 # One long-running Node web service: it builds the Vite frontend and the Express
 # server serves both the API (SSE agent runs) and the static dist/ bundle.
 #

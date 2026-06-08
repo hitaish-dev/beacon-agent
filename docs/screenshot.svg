@@ -27,9 +27,7 @@
   <text x="112" y="136" font-size="32" text-anchor="middle">🔦</text>
 
   <!-- wordmark -->
-  <text x="168" y="128" font-size="52" font-weight="800" fill="#eafaf7" letter-spacing="-1">Beacon
-    <tspan font-size="24" font-weight="600" fill="#f5a623" dx="14">by Luminark</tspan>
-  </text>
+  <text x="168" y="128" font-size="52" font-weight="800" fill="#eafaf7" letter-spacing="-1">Beacon</text>
   <text x="170" y="162" font-size="17" fill="#9fc4bf">Agentic research → report → social → WhatsApp</text>
 
   <!-- tagline -->

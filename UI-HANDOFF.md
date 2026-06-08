@@ -4,7 +4,7 @@ Paste this into a new session before doing UI work. It's enough context to tweak
 the frontend without re-reading the whole codebase.
 
 ## What this is
-"Beacon by Luminark" — an agentic research PoC (Advanced Challenge for the
+"Beacon" — an agentic research PoC (Advanced Challenge for the
 Odysseus AI assignment). One topic prompt → the agent **plans → researches the
 web → writes a report → drafts social posts → makes a PDF → sends to WhatsApp →
 stores in Supabase**, streaming each step live to the UI. Functionality is DONE
