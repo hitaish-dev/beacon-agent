@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#082a28"/>
+      <stop offset="1" stop-color="#06201f"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="0.82" cy="0.0" r="0.6">
+      <stop offset="0" stop-color="#f5a623" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#f5a623" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowT" cx="0.05" cy="0.0" r="0.6">
+      <stop offset="0" stop-color="#2bb3a8" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#2bb3a8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="amber" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f5a623"/>
+      <stop offset="1" stop-color="#ffc861"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="480" fill="url(#bg)"/>
+  <rect width="1200" height="480" fill="url(#glowA)"/>
+  <rect width="1200" height="480" fill="url(#glowT)"/>
+
+  <!-- mark -->
+  <rect x="80" y="92" width="64" height="64" rx="16" fill="#0f4441" stroke="#2bb3a8" stroke-opacity="0.45"/>
+  <text x="112" y="136" font-size="32" text-anchor="middle">🔦</text>
+
+  <!-- wordmark -->
+  <text x="168" y="128" font-size="52" font-weight="800" fill="#eafaf7" letter-spacing="-1">Beacon
+    <tspan font-size="24" font-weight="600" fill="#f5a623" dx="14">by Luminark</tspan>
+  </text>
+  <text x="170" y="162" font-size="17" fill="#9fc4bf">Agentic research → report → social → WhatsApp</text>
+
+  <!-- tagline -->
+  <text x="80" y="232" font-size="22" fill="#eafaf7" font-weight="600">One topic in. A sourced report, social posts, a PDF, and a WhatsApp message out —</text>
+  <text x="80" y="262" font-size="22" fill="#eafaf7" font-weight="600">autonomously, <tspan fill="#2bb3a8">streaming every step live.</tspan></text>
+
+  <!-- pipeline chips -->
+  <g font-size="15" font-weight="600">
+    <g>
+      <rect x="80"  y="320" width="118" height="44" rx="12" fill="#0a3331" stroke="#2bb3a8" stroke-opacity="0.3"/>
+      <text x="139" y="348" text-anchor="middle" fill="#eafaf7">🧭 Plan</text>
+    </g>
+    <g>
+      <rect x="214" y="320" width="138" height="44" rx="12" fill="#0a3331" stroke="#2bb3a8" stroke-opacity="0.3"/>
+      <text x="283" y="348" text-anchor="middle" fill="#eafaf7">🔎 Research</text>
+    </g>
+    <g>
+      <rect x="368" y="320" width="124" height="44" rx="12" fill="#0a3331" stroke="#2bb3a8" stroke-opacity="0.3"/>
+      <text x="430" y="348" text-anchor="middle" fill="#eafaf7">📝 Report</text>
+    </g>
+    <g>
+      <rect x="508" y="320" width="120" height="44" rx="12" fill="#0a3331" stroke="#2bb3a8" stroke-opacity="0.3"/>
+      <text x="568" y="348" text-anchor="middle" fill="#eafaf7">📣 Social</text>
+    </g>
+    <g>
+      <rect x="644" y="320" width="104" height="44" rx="12" fill="#0a3331" stroke="#2bb3a8" stroke-opacity="0.3"/>
+      <text x="696" y="348" text-anchor="middle" fill="#eafaf7">📄 PDF</text>
+    </g>
+    <g>
+      <rect x="764" y="320" width="146" height="44" rx="12" fill="#0a3331" stroke="#2bb3a8" stroke-opacity="0.3"/>
+      <text x="837" y="348" text-anchor="middle" fill="#eafaf7">💬 WhatsApp</text>
+    </g>
+    <g>
+      <rect x="926" y="320" width="110" height="44" rx="12" fill="url(#amber)"/>
+      <text x="981" y="348" text-anchor="middle" fill="#2a1800">🗄️ Store</text>
+    </g>
+  </g>
+
+  <!-- stack line -->
+  <text x="80" y="424" font-size="14" fill="#5f8480" font-family="'JetBrains Mono', ui-monospace, monospace">React · Vite · Node/Express · LangChain · Gemini→OpenAI→Claude · Tavily · Twilio · Supabase</text>
+</svg>
