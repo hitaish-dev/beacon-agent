@@ -52,8 +52,25 @@ export default function App() {
   const [history, setHistory] = useState([]);
   const [reportExpanded, setReportExpanded] = useState(false);
   const [reportOverflows, setReportOverflows] = useState(false);
+  // Auth gate (active only when the backend has APP_PASSWORD set).
+  const [authGate, setAuthGate] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [authed, setAuthed] = useState(false);
+  const [pwInput, setPwInput] = useState('');
+  const [authError, setAuthError] = useState('');
+  const tokenRef = useRef(localStorage.getItem('beacon_token') || '');
   const reportRef = useRef(null);
   const esRef = useRef(null);
+
+  // fetch wrapper that attaches the bearer token when we have one.
+  const authFetch = (url, opts = {}) =>
+    fetch(url, {
+      ...opts,
+      headers: {
+        ...(opts.headers || {}),
+        ...(tokenRef.current ? { Authorization: `Bearer ${tokenRef.current}` } : {}),
+      },
+    });
 
   // Decide whether the report is long enough to warrant a "Read more" toggle.
   useEffect(() => {
@@ -62,14 +79,69 @@ export default function App() {
     setReportOverflows(el ? el.scrollHeight > REPORT_CLAMP : false);
   }, [result]);
 
-  const loadStatus = () => fetch('/api/status').then((r) => r.json()).then(setStatus).catch(() => {});
+  const loadStatus = () => authFetch('/api/status').then((r) => r.json()).then(setStatus).catch(() => {});
   const loadHistory = () =>
-    fetch('/api/runs').then((r) => r.json()).then((d) => Array.isArray(d) && setHistory(d)).catch(() => {});
+    authFetch('/api/runs').then((r) => r.json()).then((d) => Array.isArray(d) && setHistory(d)).catch(() => {});
 
+  // On mount, find out whether a login gate is active and whether a stored token
+  // still works. If no gate, go straight in.
   useEffect(() => {
+    fetch('/api/auth')
+      .then((r) => r.json())
+      .then(async (d) => {
+        setAuthGate(Boolean(d.required));
+        if (!d.required) {
+          setAuthed(true);
+        } else if (tokenRef.current) {
+          const ok = await authFetch('/api/status').then((r) => r.ok).catch(() => false);
+          if (ok) setAuthed(true);
+          else {
+            tokenRef.current = '';
+            localStorage.removeItem('beacon_token');
+          }
+        }
+      })
+      .catch(() => setAuthed(true)) // if /api/auth is unreachable, fail open
+      .finally(() => setAuthChecked(true));
+  }, []);
+
+  // Load data once we're authenticated.
+  useEffect(() => {
+    if (!authed) return;
     loadStatus();
     loadHistory();
-  }, []);
+  }, [authed]);
+
+  const login = (e) => {
+    e?.preventDefault?.();
+    setAuthError('');
+    fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwInput }),
+    })
+      .then(async (r) => {
+        const d = await r.json().catch(() => ({}));
+        if (r.ok && d.ok) {
+          tokenRef.current = d.token || '';
+          localStorage.setItem('beacon_token', tokenRef.current);
+          setPwInput('');
+          setAuthed(true);
+        } else {
+          setAuthError(d.error || 'Incorrect password');
+        }
+      })
+      .catch(() => setAuthError('Login failed — try again'));
+  };
+
+  const logout = () => {
+    tokenRef.current = '';
+    localStorage.removeItem('beacon_token');
+    setAuthed(false);
+    setStatus(null);
+    setResult(null);
+    setHistory([]);
+  };
 
   const run = () => {
     if (!topic.trim() || running) return;
@@ -86,6 +158,7 @@ export default function App() {
       depth: String(DEPTH_LEVELS[depthLevel].pages),
       sendToWhatsApp: String(sendWa),
     });
+    if (tokenRef.current) params.set('token', tokenRef.current);
     const es = new EventSource(`/api/run?${params.toString()}`);
     esRef.current = es;
 
@@ -145,6 +218,32 @@ export default function App() {
     ? `Sent via Twilio (${wa.status || 'queued'})${wa.mediaUrl ? ' · with PDF' : ''}`
     : `Failed: ${wa.error}`;
 
+  // ── Login gate ──
+  if (!authChecked) {
+    return <div className="auth-wrap" />; // brief blank while we check /api/auth
+  }
+  if (authGate && !authed) {
+    return (
+      <div className="auth-wrap">
+        <form className="auth-card" onSubmit={login}>
+          <div className="beacon-mark auth-mark">🔦</div>
+          <h1 className="auth-title">Beacon</h1>
+          <p className="auth-sub">Enter the access password to continue.</p>
+          <input
+            type="password"
+            className="auth-input"
+            placeholder="Password"
+            value={pwInput}
+            onChange={(e) => setPwInput(e.target.value)}
+            autoFocus
+          />
+          {authError && <div className="auth-error">{authError}</div>}
+          <button type="submit" className="run-btn auth-btn">Unlock</button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <header className="header">
@@ -155,7 +254,12 @@ export default function App() {
             <p>Agentic research → report → social → WhatsApp</p>
           </div>
         </div>
-        {modesView}
+        <div className="header-right">
+          {modesView}
+          {authGate && authed && (
+            <button className="signout-btn" onClick={logout}>Sign out</button>
+          )}
+        </div>
       </header>
 
       <div className="grid">
@@ -325,7 +429,7 @@ export default function App() {
                     {(result.pdfUrl || result.pdfReady) && (
                       // Prefer the hosted Supabase URL (survives server restarts on
                       // free hosting); fall back to the local disk route otherwise.
-                      <a className="pdf-btn" href={result.pdfUrl || `/api/pdf/${result.id}`} target="_blank" rel="noreferrer">
+                      <a className="pdf-btn" href={result.pdfUrl || `/api/pdf/${result.id}${tokenRef.current ? `?token=${encodeURIComponent(tokenRef.current)}` : ''}`} target="_blank" rel="noreferrer">
                         📄 Download PDF
                       </a>
                     )}

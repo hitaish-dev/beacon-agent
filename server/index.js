@@ -24,8 +24,40 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
+// ── Simple shared-password auth ──────────────────────────────────────────────
+// If APP_PASSWORD is set, the /api routes are gated behind it; if it's unset the
+// API stays open (so zero-config local dev still works). The frontend asks
+// /api/auth whether a gate is active and shows a login screen accordingly.
+const APP_PASSWORD = process.env.APP_PASSWORD || '';
+const authRequired = () => Boolean(APP_PASSWORD);
+
+function tokenFromReq(req) {
+  const header = req.headers.authorization || '';
+  if (header.startsWith('Bearer ')) return header.slice(7);
+  // EventSource (SSE) and <a> downloads can't send headers, so they pass ?token=
+  return (req.query.token || '').toString();
+}
+
+function requireAuth(req, res, next) {
+  if (!authRequired()) return next();
+  if (tokenFromReq(req) === APP_PASSWORD) return next();
+  res.status(401).json({ error: 'unauthorized' });
+}
+
+// Public: lets the frontend know whether to show the login page.
+app.get('/api/auth', (req, res) => res.json({ required: authRequired() }));
+
+// Public: exchange the password for a token (the password itself).
+app.post('/api/login', (req, res) => {
+  const password = (req.body?.password || '').toString();
+  if (!authRequired() || password === APP_PASSWORD) {
+    return res.json({ ok: true, token: APP_PASSWORD });
+  }
+  res.status(401).json({ ok: false, error: 'Incorrect password' });
+});
+
 // Health / capability report — the UI uses this to show which modes are live.
-app.get('/api/status', async (req, res) => {
+app.get('/api/status', requireAuth, async (req, res) => {
   await getLLM(); // build the provider chain so the report is accurate
   res.json({
     ok: true,
@@ -38,7 +70,7 @@ app.get('/api/status', async (req, res) => {
 });
 
 // Run the agent with live Server-Sent Events.
-app.get('/api/run', async (req, res) => {
+app.get('/api/run', requireAuth, async (req, res) => {
   const topic = (req.query.topic || '').toString().trim();
   const brand = (req.query.brand || 'your brand').toString().trim();
   const whatsappTo = (req.query.whatsappTo || '').toString().trim() || undefined;
@@ -73,7 +105,7 @@ app.get('/api/run', async (req, res) => {
 });
 
 // Non-streaming variant (handy for scripts / curl).
-app.post('/api/run', async (req, res) => {
+app.post('/api/run', requireAuth, async (req, res) => {
   const { topic, brand, whatsappTo, sendToWhatsApp, depth } = req.body || {};
   if (!topic) {
     res.status(400).json({ error: 'topic is required' });
@@ -88,7 +120,7 @@ app.post('/api/run', async (req, res) => {
 });
 
 // Download a generated PDF report by run id.
-app.get('/api/pdf/:id', async (req, res) => {
+app.get('/api/pdf/:id', requireAuth, async (req, res) => {
   const buf = await readPdf(req.params.id.replace(/[^a-zA-Z0-9_-]/g, ''));
   if (!buf) {
     res.status(404).send('PDF not found (it may have been generated on a previous server run).');
@@ -99,7 +131,7 @@ app.get('/api/pdf/:id', async (req, res) => {
   res.send(buf);
 });
 
-app.get('/api/runs', async (req, res) => {
+app.get('/api/runs', requireAuth, async (req, res) => {
   try {
     const runs = await listRuns(20);
     res.json(runs);

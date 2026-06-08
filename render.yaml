@@ -17,6 +17,9 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 22.11.0
+      # Access gate: set a password here to put the app behind a login screen.
+      - key: APP_PASSWORD
+        sync: false
       # ── Secrets — Render prompts for these on first deploy (never stored in git) ──
       - key: GOOGLE_API_KEY
         sync: false
