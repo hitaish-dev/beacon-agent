@@ -13,7 +13,7 @@ services:
     # Render sets NODE_ENV=production, since the build needs them.
     buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
-    healthCheckPath: /api/status
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: 22.11.0

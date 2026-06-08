@@ -44,6 +44,10 @@ function requireAuth(req, res, next) {
   res.status(401).json({ error: 'unauthorized' });
 }
 
+// Public, unauthenticated liveness probe — used by the host's health check.
+// MUST stay outside requireAuth so deploys go healthy even when a password is set.
+app.get('/api/health', (req, res) => res.json({ ok: true }));
+
 // Public: lets the frontend know whether to show the login page.
 app.get('/api/auth', (req, res) => res.json({ required: authRequired() }));
 
