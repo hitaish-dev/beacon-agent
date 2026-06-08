@@ -198,8 +198,8 @@ export default function App() {
               <div>
                 <div className="wa-toggle-title">Send to WhatsApp</div>
                 <div className="wa-toggle-sub">
-                  {status?.whatsappTo
-                    ? `Recipient: ${status.whatsappTo}`
+                  {status?.whatsappConfigured
+                    ? 'Recipient configured'
                     : 'No recipient configured (.env TWILIO_WHATSAPP_TO)'}
                 </div>
               </div>

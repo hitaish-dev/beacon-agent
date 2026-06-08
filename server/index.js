@@ -32,7 +32,7 @@ app.get('/api/status', async (req, res) => {
     llm: { enabled: llmEnabled(), providers: activeProviders() },
     search: searchMode(),
     whatsapp: whatsappMode(),
-    whatsappTo: whatsappRecipient(),
+    whatsappConfigured: Boolean(whatsappRecipient()),
     store: storeMode(),
   });
 });

@@ -30,6 +30,14 @@ export function whatsappRecipient() {
   return process.env.TWILIO_WHATSAPP_TO || null;
 }
 
+// Never expose a full recipient number over the public API. The real number is
+// used internally for the Twilio send; only this masked form is ever returned.
+export function maskPhone(num) {
+  if (!num) return null;
+  const digits = String(num).replace(/\D/g, '');
+  return digits.length >= 3 ? `whatsapp:•••${digits.slice(-3)}` : 'configured';
+}
+
 export async function sendWhatsApp(body, { to = process.env.TWILIO_WHATSAPP_TO, mediaUrl } = {}) {
   const message = clamp(body);
 
@@ -42,7 +50,7 @@ export async function sendWhatsApp(body, { to = process.env.TWILIO_WHATSAPP_TO, 
     return {
       mode: 'mock',
       ok: true,
-      to: to || null,
+      to: maskPhone(to),
       mediaUrl: mediaUrl || null,
       note: 'Twilio not fully configured — message logged, not sent.',
     };
@@ -57,9 +65,9 @@ export async function sendWhatsApp(body, { to = process.env.TWILIO_WHATSAPP_TO, 
     };
     if (mediaUrl) payload.mediaUrl = [mediaUrl];
     const res = await client.messages.create(payload);
-    return { mode: 'twilio', ok: true, sid: res.sid, to, mediaUrl: mediaUrl || null, status: res.status };
+    return { mode: 'twilio', ok: true, sid: res.sid, to: maskPhone(to), mediaUrl: mediaUrl || null, status: res.status };
   } catch (err) {
     console.error('[whatsapp] Twilio send failed:', err.message);
-    return { mode: 'twilio', ok: false, to, error: err.message };
+    return { mode: 'twilio', ok: false, to: maskPhone(to), error: err.message };
   }
 }
