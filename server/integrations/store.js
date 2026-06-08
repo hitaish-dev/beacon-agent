@@ -3,6 +3,16 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { maskPhone } from './whatsapp.js';
+
+// Runs stored before recipient-masking was added still hold full numbers in the
+// DB. Mask on read so the public /api/runs never exposes them, old rows included.
+function sanitizeRun(row) {
+  if (row?.whatsapp?.to) {
+    return { ...row, whatsapp: { ...row.whatsapp, to: maskPhone(row.whatsapp.to) } };
+  }
+  return row;
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, '..', '.data');
@@ -114,11 +124,11 @@ export async function listRuns(limit = 20) {
         .order('created_at', { ascending: false })
         .limit(limit);
       if (error) throw error;
-      return data;
+      return data.map(sanitizeRun);
     } catch (err) {
       console.warn('[store] Supabase list failed, using local:', err.message);
     }
   }
   const rows = await readLocal();
-  return rows.slice(0, limit);
+  return rows.slice(0, limit).map(sanitizeRun);
 }
